@@ -47,7 +47,14 @@ exports.handler = async (event) => {
     // Cache-buster to make NEW installs pick up new icon/name quickly.
     const v = updatedAt ? encodeURIComponent(updatedAt) : String(Date.now());
 
-    const remoteIcon = settings.appIconUrl ? `${settings.appIconUrl}${settings.appIconUrl.includes('?') ? '&' : '?'}v=${v}` : null;
+    // If the admin stores a public URL in settings.appIconUrl, use it for ALL icon variants.
+    // Important: many Android launchers prefer the *maskable* icon if present. If we leave
+    // maskable pointing to a local/static file, the installed icon may look "stuck" even
+    // after the admin changes appIconUrl. So we also point the maskable icon to the same
+    // dynamic URL (with a cache-busting query).
+    const remoteIcon = settings.appIconUrl
+      ? `${settings.appIconUrl}${settings.appIconUrl.includes('?') ? '&' : '?'}v=${v}`
+      : null;
 
     const manifest = {
       name,
@@ -69,7 +76,7 @@ exports.handler = async (event) => {
           type: 'image/png'
         },
         {
-          src: '/icons/icon-512-maskable.png',
+          src: remoteIcon || '/icons/icon-512-maskable.png',
           sizes: '512x512',
           type: 'image/png',
           purpose: 'maskable'
