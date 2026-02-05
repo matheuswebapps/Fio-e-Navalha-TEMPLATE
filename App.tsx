@@ -62,47 +62,14 @@ const App: React.FC = () => {
     }
   }, [settings.appIconUrl]);
 
-  // Effect to update PWA name + manifest dynamically (para instalar com nome atualizado)
+  // Update page title (the installable PWA name/icon come from the manifest served by Netlify)
   useEffect(() => {
     const appName = settings.pwaName || settings.name || "App";
-    const shortName = settings.pwaShortName || settings.name || "App";
-
     document.title = appName;
 
     const ogTitle = document.querySelector("meta[property='og:title']") as HTMLMetaElement | null;
     if (ogTitle) ogTitle.content = appName;
-
-    const manifest = {
-      name: appName,
-      short_name: shortName,
-      start_url: "/",
-      display: "standalone",
-      background_color: "#04080F",
-      theme_color: "#0B1F3B",
-      icons: [
-        {
-          src: settings.appIconUrl || "assets/logo.png",
-          sizes: "192x192",
-          type: "image/png"
-        },
-        {
-          src: settings.appIconUrl || "assets/logo.png",
-          sizes: "512x512",
-          type: "image/png"
-        }
-      ]
-    };
-
-    const blob = new Blob([JSON.stringify(manifest)], { type: "application/manifest+json" });
-    const url = URL.createObjectURL(blob);
-
-    const link = document.querySelector("link[rel='manifest']") as HTMLLinkElement | null;
-    if (link) link.href = url;
-
-    return () => {
-      URL.revokeObjectURL(url);
-    };
-  }, [settings.pwaName, settings.pwaShortName, settings.name, settings.appIconUrl]);
+  }, [settings.pwaName, settings.name]);
 
 
   const handleTabChange = (tab: string) => {
